@@ -427,6 +427,62 @@
 
 </div><!-- /statsSection -->
 
+<!-- ═══════════════════════════════════════════════════════════════
+     STUDENT 2 (GUZMAN) CONTRIBUTION — Data Visualizations
+═══════════════════════════════════════════════════════════════════ -->
+
+<div id="vizSection" style="display:none; margin-top: 2rem;">
+
+  <!-- Section heading — mirrors Student 3's heading style exactly -->
+  <h2 style="font-size:16px; font-weight:500; margin-bottom:1rem; color:var(--color-text-primary);">
+    Visualizations
+    <!-- Small label so reviewers know this block belongs to Student 2 -->
+    <span style="font-size:11px; font-weight:400; color:var(--color-text-tertiary); margin-left:8px;">(Student 2 · feature/visualizations)</span>
+  </h2>
+
+  <!-- ── Chart Grid ─────────────────────────────────────────────
+       Four cards in a 2 × 2 grid. Each card holds a <canvas>
+       that Chart.js will draw into. Card titles describe the axis
+       mapping. IDs match the getElementById() calls in the script.
+  ──────────────────────────────────────────────────────────────── -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:2rem;">
+
+    <!-- Bar chart card: average final score per study-hours value -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Study Hours vs Final Score
+      </div>
+      <canvas id="chartBar"></canvas>
+    </div>
+
+    <!-- Scatter plot card: attendance % on x-axis, final score on y-axis -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Attendance % vs Final Score
+      </div>
+      <canvas id="chartScatter"></canvas>
+    </div>
+
+    <!-- Histogram card: count of students per 10-point score range -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Final Score Distribution
+      </div>
+      <canvas id="chartHistogram"></canvas>
+    </div>
+
+    <!-- Pie chart card: slice per letter grade (A / B / C / D / F) -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Grade Distribution
+      </div>
+      <canvas id="chartPie"></canvas>
+    </div>
+
+  </div><!-- /chart grid -->
+
+</div><!-- /vizSection -->
+
 <script>
   // ── State ──────────────────────────────────────────────────
   let originalData = [];
