@@ -1248,6 +1248,163 @@ function drawScatterPlot(data) {
   });
 }
 
+
+/* ── drawHistogram(data) ──────────────────────────────────────────
+   Creates a histogram showing how final scores are spread across
+   equal-width score ranges (bins).
+
+   A histogram is a bar chart where bars are adjacent (no gap) and
+   each bar represents a count of values in that range, not a
+   named category.
+
+   Bins are computed dynamically from the actual min/max of the data,
+   so this works for both 0–100 percentage scores and 0–5 GPA values.
+   10 equal-width bins are created; the maximum value is clamped into
+   the last bin using Math.min(index, 9) to avoid an out-of-range slot.
+────────────────────────────────────────────────────────────────── */
+function drawHistogram(data) {
+  const keys     = Object.keys(data[0] || {});
+  // Same priority logic: prefer HSC_Result, fall back to result/gpa.
+  const scoreKey = keys.find(k => /hsc/i.test(k)) || keys.find(k => /result|gpa/i.test(k));
+
+  if (!scoreKey) return;
+
+  // Collect all numeric score values from the dataset.
+  const scores = data
+    .map(r => r[scoreKey])
+    .filter(v => typeof v === 'number' && !isNaN(v));
+
+  // Compute the actual min and max so the bins adapt to any score scale.
+  // This dataset uses a 0–5 GPA scale, so hardcoded 0–100 bins would all
+  // fall into bin 0 and leave the other 9 empty.
+  const minVal   = Math.min(...scores);
+  const maxVal   = Math.max(...scores);
+  const binWidth = parseFloat(((maxVal - minVal) / 10).toFixed(4));
+
+  // Build 10 equal-width bins that span the full observed data range.
+  // label shows the human-readable [lo, hi) boundary for each bar.
+  const bins = Array.from({ length: 10 }, (_, i) => {
+    const lo = parseFloat((minVal + i       * binWidth).toFixed(2));
+    const hi = parseFloat((minVal + (i + 1) * binWidth).toFixed(2));
+    return { label: lo + '–' + hi, count: 0 };
+  });
+
+  // Place every score into its bin using the computed bin width.
+  // Math.min(..., 9) clamps the maximum value into the last bin
+  // instead of creating an out-of-range 11th entry.
+  scores.forEach(s => {
+    const idx = Math.min(Math.floor((s - minVal) / binWidth), 9);
+    bins[idx].count++;
+  });
+
+  if (window._chartHistogram) window._chartHistogram.destroy();
+
+  const ctx = document.getElementById('chartHistogram').getContext('2d');
+
+  window._chartHistogram = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: bins.map(b => b.label),
+      datasets: [{
+        label: 'Students',
+        data: bins.map(b => b.count),
+        // Purple tones make this chart visually distinct from the blue bar chart.
+        backgroundColor: 'rgba(134, 88, 226, 0.55)',
+        borderColor:     'rgba(134, 88, 226, 1)',
+        borderWidth: 1,
+        borderRadius: 2,
+        // Setting both percentage values to 1.0 removes inter-bar gaps,
+        // giving the histogram its signature "touching bars" appearance.
+        categoryPercentage: 1.0,
+        barPercentage: 1.0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Score Range' } },
+        y: { title: { display: true, text: 'Number of Students' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+
+/* ── drawPieChart(data) ───────────────────────────────────────────
+   Creates a pie chart breaking down students by letter grade.
+
+   This dataset uses the Bangladesh GPA system (0–5 scale), so the
+   grade boundaries below map GPA ranges to letter grades:
+     A+ : GPA = 5.0          (highest distinction)
+     A  : GPA 4.0 – 4.99
+     B  : GPA 3.0 – 3.99
+     C  : GPA 2.0 – 2.99
+     D  : GPA 1.0 – 1.99
+     F  : GPA < 1.0          (failing)
+
+   Each slice's angle is proportional to how many students received
+   that grade, making it easy to see the overall class performance
+   at a glance.
+────────────────────────────────────────────────────────────────── */
+function drawPieChart(data) {
+  const keys     = Object.keys(data[0] || {});
+  // Same priority logic: prefer HSC_Result, fall back to result/gpa.
+  const scoreKey = keys.find(k => /hsc/i.test(k)) || keys.find(k => /result|gpa/i.test(k));
+
+  if (!scoreKey) return;
+
+  // Start every grade counter at zero.
+  // Using an object preserves insertion order (A+ → F) for the legend.
+  const gradeCounts = { 'A+': 0, A: 0, B: 0, C: 0, D: 0, F: 0 };
+
+  // Increment the matching grade bucket for every student row.
+  data.forEach(row => {
+    const s = row[scoreKey];
+    if (typeof s !== 'number') return;
+
+    // Assign a grade based on the Bangladesh 5.0 GPA scale thresholds.
+    if      (s >= 5.0) gradeCounts['A+']++;
+    else if (s >= 4.0) gradeCounts.A++;
+    else if (s >= 3.0) gradeCounts.B++;
+    else if (s >= 2.0) gradeCounts.C++;
+    else if (s >= 1.0) gradeCounts.D++;
+    else               gradeCounts.F++;
+  });
+
+  if (window._chartPie) window._chartPie.destroy();
+
+  const ctx = document.getElementById('chartPie').getContext('2d');
+
+  window._chartPie = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      // Object.keys keeps A → F order, matching the colors array below.
+      labels: Object.keys(gradeCounts),
+      datasets: [{
+        data: Object.values(gradeCounts),
+        // Traffic-light color progression: bright green (best) → red (worst).
+        // Six colors, one per grade bucket: A+, A, B, C, D, F.
+        backgroundColor: [
+          'rgba(0,   210,  90, 0.75)',  // A+ — bright green
+          'rgba(80,  200, 120, 0.75)',  // A  — green
+          'rgba(56,  138, 221, 0.75)',  // B  — blue
+          'rgba(255, 213,  79, 0.75)',  // C  — yellow
+          'rgba(255, 140,  50, 0.75)',  // D  — orange
+          'rgba(239,  83,  80, 0.75)',  // F  — red
+        ],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        // Legend goes at the bottom so it doesn't fight for width with the chart.
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+}
+
 </script>
 
 </body>
