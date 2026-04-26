@@ -735,10 +735,12 @@ function mean(arr) {
  
  
 /* ── median(arr) ──────────────────────────────────────────────────
-   Finds the middle value after sorting the array.
+   Returns the middle value of the array after sorting.
    If the array has an even number of items, averages the two middle values.
    Formula (odd):  middle element of sorted array
    Formula (even): (left-middle + right-middle) / 2
+   Formula (odd):  sorted[mid]
+   Formula (even): (sorted[mid-1] + sorted[mid]) / 2
 ────────────────────────────────────────────────────────────────── */
 function median(arr) {
   // Create a sorted copy using spread [...arr] so we never change the original array.
