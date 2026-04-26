@@ -293,6 +293,138 @@
   <div class="pagination" id="paginationBar"></div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     STUDENT 3 (VILLAFLORES) CONTRIBUTION — Statistical Analysis Engine
+═══════════════════════════════════════════════════════════════════ -->
+
+<div id="statsSection" style="display:none; margin-top: 2rem;">
+
+  <!-- Section heading, styled to match Student 1's existing palette -->
+  <h2 style="font-size:16px; font-weight:500; margin-bottom:1rem; color:var(--color-text-primary);">
+    Statistical Analysis
+    <!-- Small label so reviewers know this block belongs to Student 3 -->
+    <span style="font-size:11px; font-weight:400; color:var(--color-text-tertiary); margin-left:8px;">(Student 3 · feature/statistics)</span>
+  </h2>
+
+  <!-- ── Summary Stat Cards ─────────────────────────────────────
+       Four quick-glance numbers: Mean, Median, Std Dev, Mode.
+       IDs match what renderStats() writes to (#statMean, etc.)
+  ──────────────────────────────────────────────────────────── -->
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:1rem;">
+
+    <!-- Mean card -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px;">Mean Score</div>
+      <div id="statMean" style="font-size:1.5rem; font-weight:600; color:var(--color-text-primary);">—</div>
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:4px;">Final Score</div>
+    </div>
+
+    <!-- Median card -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px;">Median Score</div>
+      <div id="statMedian" style="font-size:1.5rem; font-weight:600; color:var(--color-text-primary);">—</div>
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:4px;">Final Score</div>
+    </div>
+
+    <!-- Std Dev card -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px;">Std Deviation</div>
+      <div id="statStdDev" style="font-size:1.5rem; font-weight:600; color:var(--color-text-primary);">—</div>
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:4px;">Final Score</div>
+    </div>
+
+    <!-- Mode card -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px;">Mode</div>
+      <div id="statMode" style="font-size:1.5rem; font-weight:600; color:var(--color-text-primary);">—</div>
+      <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:4px;">Final Score</div>
+    </div>
+
+  </div><!-- /summary stat cards -->
+
+  <!-- ── Detailed Analysis Panels ──────────────────────────────
+       Two side-by-side panels:
+         Left  → Descriptive Statistics (count, min, max, range, variance, stddev)
+         Right → Correlation & Regression (Pearson r, slope, intercept, R², equation)
+       IDs match the DOM targets listed in the instructions for renderStats().
+  ──────────────────────────────────────────────────────────── -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:2rem;">
+
+    <!-- Left panel: Descriptive Statistics -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Descriptive Statistics — Final Score
+      </div>
+      <!-- Each row: label on the left, computed value (in a span) on the right -->
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Count (n)</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="dCount" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Min</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="dMin" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Max</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="dMax" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Range</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="dRange" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Variance (σ²)</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="dVariance" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Std Dev (σ)</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="dStdDev" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div><!-- /descriptive panel -->
+
+    <!-- Right panel: Correlation & Regression -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Correlation &amp; Regression (Study Hours → Score)
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Pearson r</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="rPearson" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Interpretation</td>
+            <td style="padding:7px 0; text-align:right;"><span id="rInterp" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Slope (m)</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="rSlope" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Intercept (b)</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="rIntercept" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-border);">
+            <td style="padding:7px 0; color:var(--color-text-secondary);">R² (fit quality)</td>
+            <td style="padding:7px 0; text-align:right; font-variant-numeric:tabular-nums;"><span id="rSquared" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:7px 0; color:var(--color-text-secondary);">Equation</td>
+            <td style="padding:7px 0; text-align:right;"><span id="rEquation" style="color:var(--color-info-text);">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div><!-- /regression panel -->
+
+  </div><!-- /analysis panels -->
+
+</div><!-- /statsSection -->
+
 <script>
   // ── State ──────────────────────────────────────────────────
   let originalData = [];
@@ -524,6 +656,398 @@
     currentPage = 1;
     renderTable();
   });
+
+/* ═══════════════════════════════════════════════════════════════
+     STUDENT 3 (VILLAFLORES) CONTRIBUTION — Statistical Analysis Engine
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── mean(arr) ────────────────────────────────────────────────────
+   Calculates the arithmetic average of an array of numbers.
+   Formula: μ = (sum of all values) / (number of values)
+────────────────────────────────────────────────────────────────── */
+function mean(arr) {
+  // Add up every number in the array using reduce().
+  // acc is the running total, val is the current element.
+  const sum = arr.reduce((acc, val) => acc + val, 0);
+ 
+  // Divide the total by how many numbers there are, then round to 2 decimal places.
+  return parseFloat((sum / arr.length).toFixed(2));
+}
+ 
+ 
+/* ── median(arr) ──────────────────────────────────────────────────
+   Finds the middle value after sorting the array.
+   If the array has an even number of items, averages the two middle values.
+   Formula (odd):  middle element of sorted array
+   Formula (even): (left-middle + right-middle) / 2
+────────────────────────────────────────────────────────────────── */
+function median(arr) {
+  // Create a sorted copy using spread [...arr] so we never change the original array.
+  const sorted = [...arr].sort((a, b) => a - b);
+ 
+  // Store the total count of elements.
+  const n = sorted.length;
+ 
+  // Find the index of the middle element (rounds down for even-length arrays).
+  const mid = Math.floor(n / 2);
+ 
+  // If odd: just return the single middle element.
+  // If even: average the two elements on either side of the center.
+  return parseFloat(
+    (n % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2).toFixed(2)
+  );
+}
+ 
+ 
+/* ── mode(arr) ────────────────────────────────────────────────────
+   Finds the most frequently occurring value(s) in the array.
+   If multiple values tie for the highest count, returns all of them
+   joined together with " & " (e.g. "75 & 80").
+────────────────────────────────────────────────────────────────── */
+function mode(arr) {
+  // Create an empty object to use as a frequency map: { value: count }.
+  const freq = {};
+ 
+  // Loop through every value in the array.
+  for (const val of arr) {
+    // If this value has been seen before, increment its count.
+    // If not, start it at 1 using the || 0 fallback.
+    freq[val] = (freq[val] || 0) + 1;
+  }
+ 
+  // Find the highest count that exists across all values.
+  const maxCount = Math.max(...Object.values(freq));
+ 
+  // Collect every value whose count equals the max count (handles ties).
+  // Convert keys back to numbers and sort them in ascending order.
+  const modes = Object.keys(freq)
+    .filter(k => freq[k] === maxCount)  // keep only the most frequent
+    .map(Number)                         // convert string keys back to numbers
+    .sort((a, b) => a - b);             // sort numerically ascending
+ 
+  // Join multiple mode values with " & ", or return a single value as a string.
+  return modes.join(' & ');
+}
+ 
+ 
+/* ── variance(arr) ────────────────────────────────────────────────
+   Calculates the population variance — the average of squared
+   differences from the mean.
+   Formula: σ² = (sum of (each value − mean)²) / n
+────────────────────────────────────────────────────────────────── */
+function variance(arr) {
+  // Reuse the mean() function we already wrote to get the average.
+  const mu = mean(arr);
+ 
+  // For every value, subtract the mean and square the result.
+  // Squaring removes negative signs so differences don't cancel out.
+  const squaredDiffs = arr.map(x => (x - mu) ** 2);
+ 
+  // Sum all the squared differences together.
+  const sumOfSquares = squaredDiffs.reduce((acc, val) => acc + val, 0);
+ 
+  // Divide by the count to get the average squared difference, then round.
+  return parseFloat((sumOfSquares / arr.length).toFixed(2));
+}
+ 
+ 
+/* ── stdDev(arr) ──────────────────────────────────────────────────
+   Standard deviation is simply the square root of the variance.
+   Formula: σ = √(variance)
+   It brings the spread measurement back to the same unit as the data.
+────────────────────────────────────────────────────────────────── */
+function stdDev(arr) {
+  // Call variance() then take the square root, and round to 2 decimal places.
+  return parseFloat(Math.sqrt(variance(arr)).toFixed(2));
+}
+ 
+ 
+/* ── pearsonCorr(x, y) ────────────────────────────────────────────
+   Measures the linear relationship between two arrays.
+   Returns r, a value between -1 and +1:
+     +1 = perfect positive relationship
+     -1 = perfect negative (inverse) relationship
+      0 = no linear relationship
+   Formula: r = Σ((xi - x̄)(yi - ȳ)) / √(Σ(xi - x̄)² · Σ(yi - ȳ)²)
+────────────────────────────────────────────────────────────────── */
+function pearsonCorr(x, y) {
+  // Get how many data points there are (x and y must have the same length).
+  const n    = x.length;
+ 
+  // Compute the mean of both arrays using our mean() function.
+  const xBar = mean(x);
+  const yBar = mean(y);
+ 
+  // These three accumulators will be filled inside the loop below.
+  let numerator = 0;  // Σ(xi - x̄)(yi - ȳ) — cross-product of deviations
+  let sumSqX    = 0;  // Σ(xi - x̄)²         — squared deviations of x
+  let sumSqY    = 0;  // Σ(yi - ȳ)²         — squared deviations of y
+ 
+  // Loop through every paired data point.
+  for (let i = 0; i < n; i++) {
+    // How far this x value is from the x mean.
+    const dx = x[i] - xBar;
+    // How far this y value is from the y mean.
+    const dy = y[i] - yBar;
+ 
+    // Multiply deviations together and add to the running cross-product total.
+    numerator += dx * dy;
+ 
+    // Accumulate squared deviations for both axes separately.
+    sumSqX    += dx * dx;
+    sumSqY    += dy * dy;
+  }
+ 
+  // The denominator is the square root of the product of both squared-deviation sums.
+  const denominator = Math.sqrt(sumSqX * sumSqY);
+ 
+  // Guard: if denominator is 0 (constant array), return 0 to avoid dividing by zero.
+  if (denominator === 0) return 0;
+ 
+  // Divide and round to 4 decimal places for precision.
+  return parseFloat((numerator / denominator).toFixed(4));
+}
+ 
+ 
+/* ── linearRegression(x, y) ──────────────────────────────────────
+   Finds the best-fit straight line through the data: y = mx + b
+     m = slope     (how much y changes per unit of x)
+     b = intercept (predicted y when x is 0)
+     R² = how well the line explains the data (0 to 1)
+   Formula:
+     slope (m)     = Σ((xi - x̄)(yi - ȳ)) / Σ(xi - x̄)²
+     intercept (b) = ȳ - m · x̄
+     R²            = r² (Pearson r squared)
+────────────────────────────────────────────────────────────────── */
+function linearRegression(x, y) {
+  // Compute means of both arrays.
+  const xBar = mean(x);
+  const yBar = mean(y);
+ 
+  // Accumulators for the slope formula numerator and denominator.
+  let numerator = 0;  // Σ(xi - x̄)(yi - ȳ)
+  let sumSqX    = 0;  // Σ(xi - x̄)²
+ 
+  // Loop through every data point to build the slope numerator and denominator.
+  for (let i = 0; i < x.length; i++) {
+    // Deviation of this x value from the x mean.
+    const dx = x[i] - xBar;
+ 
+    // Cross-product of x deviation and y deviation.
+    numerator += dx * (y[i] - yBar);
+ 
+    // Squared x deviation (used in the denominator).
+    sumSqX    += dx * dx;
+  }
+ 
+  // Calculate slope: if sumSqX is 0 (vertical line), return 0 to avoid division by zero.
+  const slope = parseFloat((sumSqX === 0 ? 0 : numerator / sumSqX).toFixed(4));
+ 
+  // Calculate intercept using the rearranged equation: b = ȳ - m · x̄
+  const intercept = parseFloat((yBar - slope * xBar).toFixed(4));
+ 
+  // Get Pearson r from our existing function, then square it to get R².
+  const r        = pearsonCorr(x, y);
+  const rSquared = parseFloat((r * r).toFixed(4));
+ 
+  // Return all three values as a single object.
+  return { slope, intercept, rSquared };
+}
+ 
+ 
+/* ── corrInterpretation(r) ────────────────────────────────────────
+   Converts a raw Pearson r number into a plain-English description.
+   Strength thresholds (based on absolute value of r):
+     |r| >= 0.7 → Strong
+     |r| >= 0.4 → Moderate
+     |r| <  0.4 → Weak
+   Direction based on sign of r:
+     r > 0 → Positive (as x goes up, y goes up)
+     r < 0 → Negative (as x goes up, y goes down)
+────────────────────────────────────────────────────────────────── */
+function corrInterpretation(r) {
+  // Use the absolute value so the strength check ignores the sign.
+  const abs = Math.abs(r);
+ 
+  // Pick the strength label using chained ternary operators.
+  const strength  = abs >= 0.7 ? 'Strong' : abs >= 0.4 ? 'Moderate' : 'Weak';
+ 
+  // Pick the direction label based on whether r is positive, negative, or zero.
+  const direction = r > 0 ? 'Positive' : r < 0 ? 'Negative' : 'Neutral';
+ 
+  // Combine into one readable string, e.g. "Strong Positive Correlation".
+  return strength + ' ' + direction + ' Correlation';
+}
+ 
+ 
+/* ── renderStats(data) ────────────────────────────────────────────
+   The main function that ties everything together.
+   Called automatically after a CSV is loaded (via hookRenderStats below).
+   It reads the data, runs all stat functions, and writes results
+   into the HTML elements defined in Block A above.
+────────────────────────────────────────────────────────────────── */
+function renderStats(data) {
+ 
+  // Wrap everything in try/catch — if anything goes wrong,
+  // we log the error quietly without breaking Student 1's table.
+  try {
+ 
+    // Get the list of all column names from the first row of data.
+    const keys = Object.keys(data[0] || {});
+ 
+    // Search for a column whose name contains "score" (case-insensitive).
+    // This works with headers like "score", "Final Score", "Score", etc.
+    const scoreKey = keys.find(k => /score/i.test(k));
+ 
+    // Search for a column whose name contains "study" or "hours".
+    // Works with "studyHours", "Study Hours", "hours", etc.
+    const hoursKey = keys.find(k => /study|hours/i.test(k));
+ 
+    // Extract all score values from the dataset, keeping only real numbers.
+    // The filter removes empty strings, nulls, and NaN that CSV parsing might produce.
+    const scores = scoreKey
+      ? data.map(r => r[scoreKey]).filter(v => typeof v === 'number' && !isNaN(v))
+      : [];  // If no score column found, default to an empty array.
+ 
+    // Extract all study hours values the same way.
+    const hours = hoursKey
+      ? data.map(r => r[hoursKey]).filter(v => typeof v === 'number' && !isNaN(v))
+      : [];  // If no hours column found, default to an empty array.
+ 
+    // If there are no score values at all, hide the stats section and stop here.
+    // This prevents showing empty/broken output for CSVs that have no score column.
+    if (scores.length === 0) {
+      document.getElementById('statsSection').style.display = 'none';
+      return;
+    }
+ 
+    // Data is valid — make the stats section visible.
+    document.getElementById('statsSection').style.display = '';
+ 
+    // ── Write summary stat cards ───────────────────────────────────
+    // Call each function and write the result directly into the matching DOM element.
+ 
+    // Compute mean of all scores and display in the Mean card.
+    document.getElementById('statMean').textContent   = mean(scores);
+ 
+    // Compute median and display in the Median card.
+    document.getElementById('statMedian').textContent = median(scores);
+ 
+    // Compute standard deviation and display in the Std Dev card.
+    document.getElementById('statStdDev').textContent = stdDev(scores);
+ 
+    // Compute mode and display in the Mode card (may show "75 & 80" if tied).
+    document.getElementById('statMode').textContent   = mode(scores);
+ 
+    // ── Write descriptive statistics panel ────────────────────────
+    // Find the single lowest score using the spread operator with Math.min.
+    const minScore = Math.min(...scores);
+ 
+    // Find the single highest score using the spread operator with Math.max.
+    const maxScore = Math.max(...scores);
+ 
+    // Total number of students/rows in the dataset.
+    document.getElementById('dCount').textContent    = scores.length;
+ 
+    // Lowest score value.
+    document.getElementById('dMin').textContent      = minScore;
+ 
+    // Highest score value.
+    document.getElementById('dMax').textContent      = maxScore;
+ 
+    // Range = highest minus lowest — shows the spread of scores.
+    document.getElementById('dRange').textContent    = maxScore - minScore;
+ 
+    // Population variance — average of squared deviations from the mean.
+    document.getElementById('dVariance').textContent = variance(scores);
+ 
+    // Standard deviation — square root of the variance.
+    document.getElementById('dStdDev').textContent   = stdDev(scores);
+ 
+    // ── Write correlation & regression panel ──────────────────────
+    // Only run this block if we found a hours column AND the arrays
+    // are the same length (they must be paired row-by-row).
+    if (hours.length > 0 && hours.length === scores.length) {
+ 
+      // Compute Pearson r: how strongly study hours and scores are related.
+      const r   = pearsonCorr(hours, scores);
+ 
+      // Compute the regression line: slope, intercept, and R².
+      const reg = linearRegression(hours, scores);
+ 
+      // Display the Pearson r coefficient (e.g. 0.9823).
+      document.getElementById('rPearson').textContent   = r;
+ 
+      // Display the plain-English interpretation (e.g. "Strong Positive Correlation").
+      document.getElementById('rInterp').textContent    = corrInterpretation(r);
+ 
+      // Display the slope of the regression line (how much score increases per hour).
+      document.getElementById('rSlope').textContent     = reg.slope;
+ 
+      // Display the intercept (predicted score when study hours = 0).
+      document.getElementById('rIntercept').textContent = reg.intercept;
+ 
+      // Display R² (how much of the score variation is explained by study hours).
+      document.getElementById('rSquared').textContent   = reg.rSquared;
+ 
+      // Decide whether to show + or - before the intercept in the equation string.
+      const sign = reg.intercept >= 0 ? '+' : '-';
+ 
+      // Use the absolute value of the intercept so the sign doesn't appear twice.
+      const absIntercept = Math.abs(reg.intercept);
+ 
+      // Build and display the equation string, e.g. "score = 2.10 x hours + 45.30".
+      document.getElementById('rEquation').textContent =
+        'score = ' + reg.slope + ' x hours ' + sign + ' ' + absIntercept;
+ 
+    } else {
+      // If there is no hours column (or lengths don't match), show "n/a"
+      // in every regression field instead of leaving stale dashes.
+      ['rPearson','rInterp','rSlope','rIntercept','rSquared','rEquation']
+        .forEach(function(id) { document.getElementById(id).textContent = 'n/a'; });
+    }
+ 
+  } catch (err) {
+    // If any error occurs (e.g. malformed data), log it to the browser console.
+    // This ensures Student 1's table and the rest of the page keep working fine.
+    console.error('Student 3: renderStats() error:', err);
+  }
+}
+ 
+ 
+/* ── hookRenderStats() ────────────────────────────────────────────
+   This IIFE (Immediately Invoked Function Expression) runs once
+   as soon as the script loads.
+ 
+   Its job: attach renderStats() to Student 1's loadCSV() function
+   WITHOUT editing any of Student 1's code.
+ 
+   How it works:
+     1. Save a reference to the original loadCSV function.
+     2. Replace loadCSV with a new wrapper function.
+     3. The wrapper calls the original first (so Student 1's table
+        still loads exactly as before), then calls renderStats()
+        to compute and display the statistics.
+ 
+   The () at the end immediately calls the function after defining it.
+────────────────────────────────────────────────────────────────── */
+(function hookRenderStats() {
+ 
+  // Save Student 1's original loadCSV so we can still call it inside the wrapper.
+  var _originalLoadCSV = loadCSV;
+ 
+  // Overwrite loadCSV with our wrapper function.
+  loadCSV = function(text) {
+    // Always run Student 1's original loader first — parses CSV and renders the table.
+    _originalLoadCSV(text);
+ 
+    // After the table is ready, run our stats engine on the same parsed data.
+    // originalData is the variable Student 1's loadCSV populates (defined in their script).
+    renderStats(originalData);
+  };
+ 
+})(); // The () here immediately invokes the function.
+
 </script>
 
 </body>
