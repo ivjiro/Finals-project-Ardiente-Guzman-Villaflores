@@ -243,6 +243,8 @@
       clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
   </style>
+  <!-- Chart.js loaded here so all chart functions can use the global Chart constructor -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -424,6 +426,62 @@
   </div><!-- /analysis panels -->
 
 </div><!-- /statsSection -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     STUDENT 2 (GUZMAN) CONTRIBUTION — Data Visualizations
+═══════════════════════════════════════════════════════════════════ -->
+
+<div id="vizSection" style="display:none; margin-top: 2rem;">
+
+  <!-- Section heading — mirrors Student 3's heading style exactly -->
+  <h2 style="font-size:16px; font-weight:500; margin-bottom:1rem; color:var(--color-text-primary);">
+    Visualizations
+    <!-- Small label so reviewers know this block belongs to Student 2 -->
+    <span style="font-size:11px; font-weight:400; color:var(--color-text-tertiary); margin-left:8px;">(Student 2 · feature/visualizations)</span>
+  </h2>
+
+  <!-- ── Chart Grid ─────────────────────────────────────────────
+       Four cards in a 2 × 2 grid. Each card holds a <canvas>
+       that Chart.js will draw into. Card titles describe the axis
+       mapping. IDs match the getElementById() calls in the script.
+  ──────────────────────────────────────────────────────────────── -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:2rem;">
+
+    <!-- Bar chart card: average final score per study-hours value -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Study Hours vs Final Score
+      </div>
+      <canvas id="chartBar"></canvas>
+    </div>
+
+    <!-- Scatter plot card: attendance % on x-axis, final score on y-axis -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Attendance % vs Final Score
+      </div>
+      <canvas id="chartScatter"></canvas>
+    </div>
+
+    <!-- Histogram card: count of students per 10-point score range -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Final Score Distribution
+      </div>
+      <canvas id="chartHistogram"></canvas>
+    </div>
+
+    <!-- Pie chart card: slice per letter grade (A / B / C / D / F) -->
+    <div style="background:var(--color-bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:16px;">
+      <div style="font-size:11px; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px;">
+        Grade Distribution
+      </div>
+      <canvas id="chartPie"></canvas>
+    </div>
+
+  </div><!-- /chart grid -->
+
+</div><!-- /vizSection -->
 
 <script>
   // ── State ──────────────────────────────────────────────────
@@ -1046,6 +1104,356 @@ function renderStats(data) {
     renderStats(originalData);
   };
  
+})(); // The () here immediately invokes the function.
+
+
+/* ═══════════════════════════════════════════════════════════════
+     STUDENT 2 (GUZMAN) CONTRIBUTION — Data Visualizations
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── drawBarChart(data) ───────────────────────────────────────────
+   Creates a bar chart showing the average final score for each
+   unique study-hours value in the dataset.
+
+   Why average instead of raw points?
+   Multiple students can share the same study-hours value, so
+   averaging collapses them into a single, readable bar height.
+
+   Steps:
+     1. Locate the "score" and "study/hours" columns by name pattern.
+     2. Group all score values by their study-hours value.
+     3. Average each group to get one bar per hours bucket.
+     4. Pass sorted labels + averaged values to Chart.js.
+────────────────────────────────────────────────────────────────── */
+function drawBarChart(data) {
+  // Pull all column names from the first row — same pattern Student 3 uses.
+  const keys = Object.keys(data[0] || {});
+
+  // Find the score column. This dataset uses "HSC_Result" (Bangladesh Higher Secondary
+  // Certificate GPA, 0–5 scale). Prefer HSC over SSC, then fall back to any column
+  // containing "result" or "gpa" so the function works with other CSVs too.
+  const scoreKey = keys.find(k => /hsc/i.test(k)) || keys.find(k => /result|gpa/i.test(k));
+
+  // Find the study-hours column: accepts "studyHours", "Study Hours", "hours", etc.
+  const hoursKey = keys.find(k => /study|hours/i.test(k));
+
+  // If either required column is missing, exit silently so nothing breaks.
+  if (!scoreKey || !hoursKey) return;
+
+  // Build a lookup: { studyHoursValue → [score, score, ...] }
+  // This lets us group every student score under their hours value.
+  const groups = {};
+  data.forEach(row => {
+    const h = row[hoursKey];
+    const s = row[scoreKey];
+    // Skip rows where either value is not a real number (handles blanks/NaN).
+    if (typeof h !== 'number' || typeof s !== 'number') return;
+    if (!groups[h]) groups[h] = [];
+    groups[h].push(s);
+  });
+
+  // Sort the study-hours values numerically so bars run left → right in order.
+  const labels = Object.keys(groups).map(Number).sort((a, b) => a - b);
+
+  // For each hours value, compute the mean score across all students in that group.
+  const values = labels.map(h => {
+    const arr = groups[h];
+    return parseFloat((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2));
+  });
+
+  // Destroy any previously rendered instance on this canvas.
+  // Without this, Chart.js throws "canvas already in use" when the user reloads a CSV.
+  if (window._chartBar) window._chartBar.destroy();
+
+  // Get the 2D drawing context of the canvas element.
+  const ctx = document.getElementById('chartBar').getContext('2d');
+
+  // Create the Chart.js bar chart and store the instance globally for later cleanup.
+  window._chartBar = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Avg Final Score',
+        data: values,
+        // Blue tones match the info-color theme already used in Student 3's panels.
+        backgroundColor: 'rgba(56, 138, 221, 0.55)',
+        borderColor:     'rgba(56, 138, 221, 1)',
+        borderWidth: 1,
+        borderRadius: 4,   // Slight rounding to match the page's rounded-corner style.
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },  // Label is obvious from the card title.
+      scales: {
+        x: { title: { display: true, text: hoursKey } },
+        y: { title: { display: true, text: 'Avg Score' }, beginAtZero: false }
+      }
+    }
+  });
+}
+
+
+/* ── drawScatterPlot(data) ────────────────────────────────────────
+   Creates a scatter plot with Attendance % on the x-axis and
+   Final Score on the y-axis.
+
+   A scatter plot works well here because both columns are continuous
+   numbers, and we want to see the overall shape of the relationship
+   rather than summarised averages.
+
+   Chart.js scatter type expects data as an array of { x, y } objects.
+────────────────────────────────────────────────────────────────── */
+function drawScatterPlot(data) {
+  const keys = Object.keys(data[0] || {});
+  // Same priority logic as drawBarChart: prefer HSC_Result, fall back to result/gpa.
+  const scoreKey  = keys.find(k => /hsc/i.test(k)) || keys.find(k => /result|gpa/i.test(k));
+
+  // Find the attendance column: accepts "attendance", "Attendance %", etc.
+  const attendKey = keys.find(k => /attend/i.test(k));
+
+  // Both columns must exist for a meaningful scatter plot.
+  if (!scoreKey || !attendKey) return;
+
+  // Map each row to a { x, y } point and drop any row with a non-numeric value.
+  // Chart.js scatter requires this exact shape — no bare arrays allowed.
+  const points = data
+    .map(row => ({ x: row[attendKey], y: row[scoreKey] }))
+    .filter(p => typeof p.x === 'number' && typeof p.y === 'number');
+
+  if (window._chartScatter) window._chartScatter.destroy();
+
+  const ctx = document.getElementById('chartScatter').getContext('2d');
+
+  window._chartScatter = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Student',
+        data: points,
+        // Cyan / teal so this chart is visually distinct from the blue bar chart.
+        backgroundColor: 'rgba(97, 218, 251, 0.45)',
+        pointRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: attendKey } },
+        y: { title: { display: true, text: scoreKey  } }
+      }
+    }
+  });
+}
+
+
+/* ── drawHistogram(data) ──────────────────────────────────────────
+   Creates a histogram showing how final scores are spread across
+   equal-width score ranges (bins).
+
+   A histogram is a bar chart where bars are adjacent (no gap) and
+   each bar represents a count of values in that range, not a
+   named category.
+
+   Bins are computed dynamically from the actual min/max of the data,
+   so this works for both 0–100 percentage scores and 0–5 GPA values.
+   10 equal-width bins are created; the maximum value is clamped into
+   the last bin using Math.min(index, 9) to avoid an out-of-range slot.
+────────────────────────────────────────────────────────────────── */
+function drawHistogram(data) {
+  const keys     = Object.keys(data[0] || {});
+  // Same priority logic: prefer HSC_Result, fall back to result/gpa.
+  const scoreKey = keys.find(k => /hsc/i.test(k)) || keys.find(k => /result|gpa/i.test(k));
+
+  if (!scoreKey) return;
+
+  // Collect all numeric score values from the dataset.
+  const scores = data
+    .map(r => r[scoreKey])
+    .filter(v => typeof v === 'number' && !isNaN(v));
+
+  // Compute the actual min and max so the bins adapt to any score scale.
+  // This dataset uses a 0–5 GPA scale, so hardcoded 0–100 bins would all
+  // fall into bin 0 and leave the other 9 empty.
+  const minVal   = Math.min(...scores);
+  const maxVal   = Math.max(...scores);
+  const binWidth = parseFloat(((maxVal - minVal) / 10).toFixed(4));
+
+  // Build 10 equal-width bins that span the full observed data range.
+  // label shows the human-readable [lo, hi) boundary for each bar.
+  const bins = Array.from({ length: 10 }, (_, i) => {
+    const lo = parseFloat((minVal + i       * binWidth).toFixed(2));
+    const hi = parseFloat((minVal + (i + 1) * binWidth).toFixed(2));
+    return { label: lo + '–' + hi, count: 0 };
+  });
+
+  // Place every score into its bin using the computed bin width.
+  // Math.min(..., 9) clamps the maximum value into the last bin
+  // instead of creating an out-of-range 11th entry.
+  scores.forEach(s => {
+    const idx = Math.min(Math.floor((s - minVal) / binWidth), 9);
+    bins[idx].count++;
+  });
+
+  if (window._chartHistogram) window._chartHistogram.destroy();
+
+  const ctx = document.getElementById('chartHistogram').getContext('2d');
+
+  window._chartHistogram = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: bins.map(b => b.label),
+      datasets: [{
+        label: 'Students',
+        data: bins.map(b => b.count),
+        // Purple tones make this chart visually distinct from the blue bar chart.
+        backgroundColor: 'rgba(134, 88, 226, 0.55)',
+        borderColor:     'rgba(134, 88, 226, 1)',
+        borderWidth: 1,
+        borderRadius: 2,
+        // Setting both percentage values to 1.0 removes inter-bar gaps,
+        // giving the histogram its signature "touching bars" appearance.
+        categoryPercentage: 1.0,
+        barPercentage: 1.0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Score Range' } },
+        y: { title: { display: true, text: 'Number of Students' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+
+/* ── drawPieChart(data) ───────────────────────────────────────────
+   Creates a pie chart breaking down students by letter grade.
+
+   This dataset uses the Bangladesh GPA system (0–5 scale), so the
+   grade boundaries below map GPA ranges to letter grades:
+     A+ : GPA = 5.0          (highest distinction)
+     A  : GPA 4.0 – 4.99
+     B  : GPA 3.0 – 3.99
+     C  : GPA 2.0 – 2.99
+     D  : GPA 1.0 – 1.99
+     F  : GPA < 1.0          (failing)
+
+   Each slice's angle is proportional to how many students received
+   that grade, making it easy to see the overall class performance
+   at a glance.
+────────────────────────────────────────────────────────────────── */
+function drawPieChart(data) {
+  const keys     = Object.keys(data[0] || {});
+  // Same priority logic: prefer HSC_Result, fall back to result/gpa.
+  const scoreKey = keys.find(k => /hsc/i.test(k)) || keys.find(k => /result|gpa/i.test(k));
+
+  if (!scoreKey) return;
+
+  // Start every grade counter at zero.
+  // Using an object preserves insertion order (A+ → F) for the legend.
+  const gradeCounts = { 'A+': 0, A: 0, B: 0, C: 0, D: 0, F: 0 };
+
+  // Increment the matching grade bucket for every student row.
+  data.forEach(row => {
+    const s = row[scoreKey];
+    if (typeof s !== 'number') return;
+
+    // Assign a grade based on the Bangladesh 5.0 GPA scale thresholds.
+    if      (s >= 5.0) gradeCounts['A+']++;
+    else if (s >= 4.0) gradeCounts.A++;
+    else if (s >= 3.0) gradeCounts.B++;
+    else if (s >= 2.0) gradeCounts.C++;
+    else if (s >= 1.0) gradeCounts.D++;
+    else               gradeCounts.F++;
+  });
+
+  if (window._chartPie) window._chartPie.destroy();
+
+  const ctx = document.getElementById('chartPie').getContext('2d');
+
+  window._chartPie = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      // Object.keys keeps A → F order, matching the colors array below.
+      labels: Object.keys(gradeCounts),
+      datasets: [{
+        data: Object.values(gradeCounts),
+        // Traffic-light color progression: bright green (best) → red (worst).
+        // Six colors, one per grade bucket: A+, A, B, C, D, F.
+        backgroundColor: [
+          'rgba(0,   210,  90, 0.75)',  // A+ — bright green
+          'rgba(80,  200, 120, 0.75)',  // A  — green
+          'rgba(56,  138, 221, 0.75)',  // B  — blue
+          'rgba(255, 213,  79, 0.75)',  // C  — yellow
+          'rgba(255, 140,  50, 0.75)',  // D  — orange
+          'rgba(239,  83,  80, 0.75)',  // F  — red
+        ],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        // Legend goes at the bottom so it doesn't fight for width with the chart.
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+}
+
+
+/* ── initCharts(data) ────────────────────────────────────────────
+   Entry point called once after the CSV is loaded.
+   Shows the visualization section and fires all four draw functions.
+   This is the equivalent of onDataReady() mentioned in the TODO —
+   it is triggered by the hookInitCharts wrapper below.
+────────────────────────────────────────────────────────────────── */
+function initCharts(data) {
+  // Make the visualization section visible now that real data exists.
+  document.getElementById('vizSection').style.display = '';
+
+  // Call each chart function in turn.
+  // Order doesn't matter — each targets its own canvas element.
+  drawBarChart(data);
+  drawScatterPlot(data);
+  drawHistogram(data);
+  drawPieChart(data);
+}
+
+
+/* ── hookInitCharts() ────────────────────────────────────────────
+   Uses the same wrapper pattern Student 3 used for hookRenderStats:
+     1. Save whatever version of loadCSV currently exists
+        (which by now is already Student 3's wrapped version).
+     2. Replace loadCSV with a new function that calls the saved
+        version first (so Student 1's table and Student 3's stats
+        still run), then calls initCharts() to render the charts.
+
+   This approach means no student edits another student's code —
+   every section hooks in through the same public loadCSV name.
+
+   The () at the end immediately invokes the function on page load.
+────────────────────────────────────────────────────────────────── */
+(function hookInitCharts() {
+
+  // Save the current loadCSV reference, which is Student 3's wrapped version.
+  var _prev = loadCSV;
+
+  // Overwrite loadCSV with our new wrapper.
+  loadCSV = function(text) {
+    // Always call the previous version first — this fires Student 1's parser
+    // and table render, then Student 3's stats, before we add our charts.
+    _prev(text);
+
+    // originalData is the variable Student 1's loadCSV populates.
+    // By the time we reach this line it is already filled with parsed rows.
+    initCharts(originalData);
+  };
+
 })(); // The () here immediately invokes the function.
 
 </script>
